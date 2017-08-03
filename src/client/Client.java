@@ -5,9 +5,9 @@ import java.util.Timer;
 
 import util.Subrutinas;
 
-public class Cmain {
+public class Client {
 	
-	private static String tag = "Cmain";
+	private static String tag = "Client";
 
 	private final static long fONCE_PER_DAY    = 1000*60*60*24;
     private final static long fONCE_PER_HOUR   = 1000*60*60;
