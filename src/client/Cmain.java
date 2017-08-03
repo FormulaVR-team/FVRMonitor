@@ -21,11 +21,15 @@ public class Cmain {
 		long inicio = Subrutinas.getDateInMills();
 		boolean seguir = true;
 		System.out.println(">>>>>>>>>>");
+		
+		// EJEMPLO DE PARÁMETROS:
+		//		"C:\Program Files\Java\jdk1.8.0_131\COPYRIGHT" 5 http://localhost:8080/FormulaVR/FvrServlet?ACC=FVRMonitor
 
-		if ( args.length < 2 ) {
+		if ( args.length < 3 ) {
 			System.err.println("Error en argumentos del programa... son necesarios:");
-			System.err.println("\t fullPathFilename");
-			System.err.println("\t secs");
+			System.err.println("\t fullPathFilename_toObserve");
+			System.err.println("\t period_in_secs");
+			System.err.println("\t url_server_listener");
 			seguir = false;
 		}
 
@@ -33,8 +37,9 @@ public class Cmain {
 			segundos = Subrutinas.parse_long( args[1] );
 			if ( segundos < 1 ) {
 				System.err.println("Error en argumentos del programa... son necesarios:");
-				System.err.println("\t fullPathFilename");
-				System.err.println("\t secs");
+				System.err.println("\t fullPathFilename_toObserve");
+				System.err.println("\t period_in_secs");
+				System.err.println("\t url_server_listener");
 				seguir = false;
 			}
 		}
@@ -43,24 +48,20 @@ public class Cmain {
 			System.out.println( "\t* fullPathFilename: " + args[0] );
 			System.out.println( "\t* secs: " + args[1] );
 
-			_mTicTac = new TicTac( args[0] );	// fullPathFilename
+			_mTicTac = new TicTac( args[0], args[2] );	// fullPathFilename
 
-//			new Thread( new Runnable() {
-//				public void run() {
-					///////////////////////////////
-					Calendar date = Calendar.getInstance();
-					// TIEMPO PARA ESTABILIZAR. Iniciará dentro de 3 segundos:
-					date.add( Calendar.SECOND, 3 );	    	
-					System.out.println("\t* >>Planificando función TicTac( " + segundos + " segundos )...");
-					_mTimer.schedule(
-						_mTicTac,						// Task
-					    date.getTime(),					// First time
-					    (fONCE_PER_SECOND * segundos)	// Period
-					    );
-					System.out.println("\t* <<Función TicTac() planificada.");
-					///////////////////////////////
-//				}
-//			} ).start();
+			///////////////////////////////
+			Calendar date = Calendar.getInstance();
+			// TIEMPO PARA ESTABILIZAR. Iniciará dentro de 3 segundos:
+			date.add( Calendar.SECOND, 3 );	    	
+			System.out.println("\t* >>Planificando función TicTac( " + segundos + " segundos )...");
+			_mTimer.schedule(
+				_mTicTac,						// Task
+			    date.getTime(),					// First time
+			    (fONCE_PER_SECOND * segundos)	// Period
+			    );
+			System.out.println("\t* <<Función TicTac() planificada.");
+			///////////////////////////////
 			
 		}
 

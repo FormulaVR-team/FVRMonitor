@@ -19,11 +19,26 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.http.NameValuePair;
+
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+import util.http.client.IHttpClient;
+import util.http.client.IHttpMethods;
+import util.http.client.ProxyHttpMethods;
+import util.http.client.TLSHttpClient;
 
 /**
  * @author Emilio Estecha 2017
@@ -136,6 +151,103 @@ public class Subrutinas {
 		
 		return resultado;
     }
+
+	public static String neutralizarCaracteresEspeciales(String inOut) {
+	    // La representaciÛn o descomposiciÛn canÛnica consiste en la descomposiciÛn del car·cter en 2 partes:
+		//- Parte 1: Letra base
+		//- Parte 2: Acento
+		// DescomposiciÛn canÛnica
+	    inOut = Normalizer.normalize(inOut, Normalizer.Form.NFD);
+	    // Nos quedamos ˙nicamente con los caracteres ASCII
+	    Pattern pattern = Pattern.compile("\\P{ASCII}+");
+	    inOut = pattern.matcher(inOut).replaceAll(""); 
+	    pattern = null;
+	    return inOut;
+	}
+	public static String neutralizarCaracteresEspeciales_bis(String inOut) {
+	    String original = "·‡‰ÈËÎÌÏÔÛÚˆ˙˘¸Ò¡¿ƒ…»ÀÕÃœ”“÷⁄Ÿ‹—Á«";
+	    String ascii    = "aaaeeeiiiooouuunAAAEEEIIIOOOUUUNcC";
+	    for (int i=0; i<original.length(); i++) {
+	        inOut = inOut.replace(original.charAt(i),ascii.charAt(i));
+	    }
+	    return inOut;
+	}
+	public static String neutralizarCaracteres_CompatibilizarConFileNames(String inOut, char caracterSustituto) {
+		//    \ / : * ? " < > |
+	    inOut = inOut.replace('\\', caracterSustituto);
+	    inOut = inOut.replace( '/', caracterSustituto);
+	    inOut = inOut.replace( ':', caracterSustituto);
+	    inOut = inOut.replace( '*', caracterSustituto);
+	    inOut = inOut.replace( '?', caracterSustituto);
+	    inOut = inOut.replace( '"', caracterSustituto);
+	    inOut = inOut.replace( '<', caracterSustituto);
+	    inOut = inOut.replace( '>', caracterSustituto);
+	    inOut = inOut.replace( '|', caracterSustituto);
+
+	    // agregado 2016-06-23:
+	    inOut = inOut.replace('\t', caracterSustituto);
+	    inOut = inOut.replace('\r', caracterSustituto);
+	    inOut = inOut.replace('\n', caracterSustituto);
+	    
+	    return inOut;
+	}
+	public static String neutralizarCaracteres_CompatibilizarCon_emailName_LOCALPART(String inOut) {
+		// SACADO DE: https://en.wikipedia.org/wiki/Email_address#Local_part
+//		Local part[edit]
+//		The local-part of the email address may use any of these ASCII characters.[4] RFC 6531 permits Unicode characters beyond the ASCII range:
+//
+//		Uppercase and lowercase Latin letters (AñZ, añz) (ASCII: 65ñ90, 97ñ122)
+//		Digits 0 to 9 (ASCII: 48ñ57)
+//		These special characters: # - _ ~ ! $ & ' ( ) * + , ; = : and percentile encoding i.e. %20
+//		Character . (dot, period, full stop), ASCII 46, provided that it is not the first or last character, and provided also that it does not appear consecutively (e.g. John..Doe@example.com is not allowed).
+//		Special characters are allowed with restrictions. They are:
+//		Space and "(),:;<>@[\] (ASCII: 32, 34, 40, 41, 44, 58, 59, 60, 62, 64, 91ñ93)
+//		Comments are allowed with parentheses at either end of the local part; e.g. john.smith(comment)@example.com and (comment)john.smith@example.com are both equivalent to john.smith@example.com.
+//		International characters above U+007F, encoded as UTF-8, are permitted by RFC 6531, though mail systems may restrict which characters to use when assigning local parts.
+//		A quoted string may exist as a dot separated entity within the local-part, or it may exist when the outermost quotes are the outermost characters of the local-part (e.g., abc."defghi".xyz@example.com or "abcdefghixyz"@example.com are allowed. Conversely, abc"defghi"xyz@example.com is not; neither is abc\"def\"ghi@example.com). Quoted strings and characters however, are not commonly used. RFC 5321 also warns that "a host that expects to receive mail SHOULD avoid defining mailboxes where the Local-part requires (or uses) the Quoted-string form".
+//
+//		The local-part postmaster is treated speciallyñit is case-insensitive, and should be forwarded to the domain email administrator. Technically all other local-parts are case-sensitive, therefore jsmith@example.com and JSmith@example.com specify different mailboxes; however, many organizations treat uppercase and lowercase letters as equivalent.
+//
+//		Most organizations do not allow use of many of the technically valid special characters. Organizations may restrict the form of an email addresses as desired, e.g., Windows Live Hotmail only allows creation of email addresses using alphanumerics, dot (.), underscore (_) and hyphen (-).[5]
+		
+		// "(),:;<>@[\] 
+	    String original = "\"(),:;<>@[]{} ";
+	    String ascii    =  "___...........";
+	    for (int i=0; i<original.length(); i++) {
+	        inOut = inOut.replace(original.charAt(i),ascii.charAt(i));
+	    }
+	    return inOut;
+	}
+	public static String neutralizarNIF(String nif) {
+		nif = nif.toUpperCase();
+		Subrutinas.neutralizarCaracteresEspeciales( nif );
+		Subrutinas.neutralizarCaracteres_CompatibilizarCon_emailName_LOCALPART( nif );
+		nif = nif.replace("/","");
+		nif = nif.replace("-","");
+		nif = nif.replace(".","");
+		nif = nif.replace("_","");
+		nif = nif.replace("=","");
+		nif = nif.replace("%","");
+		
+		return nif;
+	}
+
+	public byte[] base64_decode( String texto_B64 ) {
+		byte[] byteArray = null;
+		BASE64Decoder decoder = new BASE64Decoder();
+		try {
+			byteArray = decoder.decodeBuffer(texto_B64);
+		} catch (IOException e) { System.out.println( "base64_decode() : " + e.getMessage() ); }
+		return byteArray;
+	}
+	public String base64_encode( byte[] datos ) {
+		String resultado = null;
+		if ( datos != null ) {
+			resultado = new BASE64Encoder().encode(datos);
+		}
+        return resultado;
+	}
+    
     //////////////////////
 	// FICHEROS
 	public static int ZIP_addFiles         ( final StringBuffer logVar_o_null, final String[] fileNamesList,  final String nombreZipFicheroCompleto ) {
@@ -488,6 +600,41 @@ public class Subrutinas {
 		}
 		return res;
 	}
+	////////////////////////
+
+	public static void send_http( String url, String mensaje, String resHttp_code_msg[] ) {
+
+//		Logger logger =  Logger.newLogger("PaypalMethods|SetExpressCheckout");
+		String resp = "";
+		final String charset = "UTF-8";
+
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		Map<String,String> headers = new HashMap<String, String>();
+
+//		params.add(new BasicNameValuePair("USER", "el user"));
+//		headers.put("","");
+		String payload = mensaje;
+
+		IHttpClient clientBuilder = new TLSHttpClient("TLSv1.2");
+		IHttpMethods httpMethods = new ProxyHttpMethods(charset);
+		try {
+			resp = httpMethods.doPost(clientBuilder, url, params, headers, payload);
+			//200^TOKEN=EC%2d6H461454JC6519307&TIMESTAMP=2016%2d06%2d16T22%3a43%3a57Z&CORRELATIONID=c462c0774dac4&ACK=Success&VERSION=78&BUILD=000000
+			if ( resp instanceof String ) {
+				String [] trozos = resp.split("\\^"); 
+				if ( trozos != null && trozos.length == 2 ) {
+					resHttp_code_msg[0] = trozos[0];
+					resHttp_code_msg[1] = trozos[1];
+				}
+			}
+		} catch (Exception e) {
+			// System.err.println( e.getMessage() );
+			// logger.a(e.getMessage()).pln();
+		}
+		httpMethods = null;
+		// logger.a(resp).pln();
+	}
+
 	////////////////////////
 	
 }
