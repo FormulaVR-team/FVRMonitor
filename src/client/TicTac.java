@@ -80,7 +80,8 @@ public class TicTac extends TimerTask {
 		if ( contador_de_llamadas_pendientes_al_Server < 2) {
 			procesarFicherosPendientes();
 		} else {
-			System.out.println( "BUSY" );
+//			System.out.println( "BUSY" );
+			System.out.print( "." );
 		}
 
 //		for ( int i= 0; i < contador_de_llamadas_pendientes_Server; i++) { System.out.print(" "); }
@@ -146,7 +147,7 @@ public class TicTac extends TimerTask {
 				}
 
 			}
-			System.out.println( tag + ".procesarFicherosPendientes() " + ((Subrutinas.getDateInMills() - inicio) / 1000.0) + " segundos" );
+			System.out.println( tag + ".procesarFicherosPendientes( " + lista.length + " regs ) " + ((Subrutinas.getDateInMills() - inicio) / 1000.0) + " segundos" );
 		}
 
 		/////////////
