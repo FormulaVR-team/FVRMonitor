@@ -116,7 +116,8 @@ public class TicTac extends TimerTask {
 				
 				contenido = Subrutinas.readFile( null, item.getAbsolutePath() );
 				json.clear();
-				json.put("name", item.getName());
+				json.put("client", Subrutinas.getComputername());
+				json.put("filename", item.getName());
 				json.put("content", contenido);
 
 				if ( contenido != null && contenido.trim().length() > 0 ) {
