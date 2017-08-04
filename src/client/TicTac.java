@@ -20,6 +20,7 @@ public class TicTac extends TimerTask {
 	private static String m_fullPathFilenameToObserve;
 	private static String m_url;
 	private static String m_pathBuffer;
+	private static FileTime recu_creationTime = null;
 	private static FileTime recu_lastModifiedTime = null;
 	private static long recu_size = 0;
 
@@ -63,16 +64,31 @@ public class TicTac extends TimerTask {
 	private void pasoPeriodico_1d2() {
 		File f = new File( m_fullPathFilenameToObserve );
 		if ( f.isFile() && f.exists() ) {
+			boolean isPersistir = false;
 			try {
 				Path path = f.toPath();
 				BasicFileAttributes atributos = Files.readAttributes(path, BasicFileAttributes.class);
-				if ( recu_lastModifiedTime == null || atributos.lastModifiedTime().compareTo( recu_lastModifiedTime ) != 0 ) {
-					if ( atributos.size() != recu_size ) {
-						persistirFichero( f, atributos.lastModifiedTime() );
-					}
+
+				///////////////
+				if ( recu_creationTime == null || atributos.creationTime().compareTo( recu_creationTime ) != 0 ) {
+					isPersistir = true;
 				}
+				if ( recu_lastModifiedTime == null || atributos.lastModifiedTime().compareTo( recu_lastModifiedTime ) != 0 ) {
+					isPersistir = true;
+				}
+				if ( atributos.size() != recu_size ) {
+					isPersistir = true;
+				}
+				///////////////
+				
+				recu_creationTime = atributos.creationTime();
 				recu_lastModifiedTime = atributos.lastModifiedTime();
 				recu_size = atributos.size();
+
+				if ( isPersistir ) {
+					persistirFichero( f, atributos.lastModifiedTime() );
+				}
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
