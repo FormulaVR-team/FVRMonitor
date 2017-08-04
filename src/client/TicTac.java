@@ -56,6 +56,11 @@ public class TicTac extends TimerTask {
 //		System.out.println("Chequeando " + m_fullPathFilename);
 //		System.out.print(".");
 
+		pasoPeriodico_1d2();	// push to buffer
+
+		pasoPeriodico_2d2();	// pop from buffer
+	}
+	private void pasoPeriodico_1d2() {
 		File f = new File( m_fullPathFilenameToObserve );
 		if ( f.isFile() && f.exists() ) {
 			try {
@@ -72,7 +77,9 @@ public class TicTac extends TimerTask {
 				e.printStackTrace();
 			}
 		}
-
+		f = null;
+	}
+	private void pasoPeriodico_2d2() {
 		contador_de_llamadas_pendientes_al_Server++;
 //		for ( int i= 0; i < contador_de_llamadas_pendientes_Server; i++) { System.out.print(" "); }
 //		System.out.println( "Antes   " + contador_de_llamadas_pendientes_Server );
@@ -148,7 +155,8 @@ public class TicTac extends TimerTask {
 				}
 
 			}
-			System.out.println( tag + ".procesarFicherosPendientes( " + lista.length + " regs ) " + ((Subrutinas.getDateInMills() - inicio) / 1000.0) + " segundos" );
+//			System.out.println( tag + ".procesarFicherosPendientes( " + lista.length + " regs ) " + ((Subrutinas.getDateInMills() - inicio) / 1000.0) + " segundos" );
+			System.out.print( "?" );
 		}
 
 		/////////////
