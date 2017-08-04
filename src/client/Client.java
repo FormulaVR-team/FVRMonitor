@@ -23,7 +23,7 @@ public class Client {
 		System.out.println(">>>>>>>>>>");
 		
 		// EJEMPLO DE PARÁMETROS:
-		//		"C:\Program Files\Java\jdk1.8.0_131\COPYRIGHT" 5 http://localhost:8080/FormulaVR/FvrServlet?ACC=FVRMonitor
+		//		java -jar FVRMonitor.jar "C:\Program Files\Java\jdk1.8.0_131\COPYRIGHT" 5 http://localhost:8080/FormulaVR/FvrServlet?ACC=FVRMonitor
 
 		if ( args.length < 3 ) {
 			System.err.println("Error en argumentos del programa... son necesarios:");
