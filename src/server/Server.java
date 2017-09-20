@@ -48,6 +48,7 @@ public class Server {
 			}
 
 			if (line.equals("")) {
+				// Leer datos del POST recibido:
 				if ( contentLength > 0 ) {
 					char cbuf[] = new char[contentLength];
 					int char_readed = reader.read(cbuf);
@@ -58,9 +59,11 @@ public class Server {
 				} else {
 					responder(out, false, "NO POST DATA RCEIVED");
 				}
+				break;
 			}
 		}
 		server.close();
+//		System.out.println("server.close();");
 	}
 
 	private static void responder(OutputStream out, boolean rc, String texto)throws IOException {
@@ -84,6 +87,8 @@ public class Server {
 		// response:
 		out.write(response);
 		out.flush();
+
+		out.close();
 
 //		System.out.println("RESPONSE:" + jsonObject.toString());
 	
